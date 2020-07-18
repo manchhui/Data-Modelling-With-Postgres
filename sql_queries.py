@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS songplays (songplay_id int NOT NULL,
                                         FOREIGN KEY (song_id) REFERENCES songs (song_id),
                                         FOREIGN KEY (artist_id) REFERENCES artists (artist_id),
                                         FOREIGN KEY (start_time) REFERENCES time (start_time),
-                                        FOREIGN KEY (user_id) REFERENCES users (user_id));
+                                        FOREIGN KEY (user_id) REFERENCES users (user_id),
+                                        UNIQUE (start_time, user_id, session_id));
 """)                                                 
 
 user_table_create = ("""
@@ -89,7 +90,9 @@ INSERT INTO users (
     gender, 
     level) 
 VALUES (%s, %s, %s, %s, %s)
-ON CONFLICT (user_id) DO NOTHING;
+ON CONFLICT (user_id) 
+DO UPDATE
+    SET level = EXCLUDED.level;
 """)
 
 song_table_insert = ("""
@@ -140,6 +143,7 @@ WHERE s.title = %s
     AND a.name = %s 
     AND s.duration = %s;
 """)
+
 
 # QUERY LISTS
 create_table_queries = [user_table_create, artist_table_create, song_table_create, time_table_create, songplay_table_create]
